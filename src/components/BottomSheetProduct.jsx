@@ -57,12 +57,29 @@ const AddProductComp = ({ fetch, db, refRBSheet }) => {
     const [imageLink, setImageLink] = useState("")
 
     const submit = async () => {
-        await db.execAsync(`
-            INSERT INTO products (name, price, stock, image) VALUES ('${name}', ${price}, ${stock}, '${imageLink}');    
-        `)
+          await db.execAsync("BEGIN TRANSACTION;");
 
-        refRBSheet.current.close()
-        fetch()
+          await db.execAsync(`
+            INSERT INTO products (name, price, stock, image) VALUES ('${name}', ${price}, ${stock}, '${imageLink}');    
+          `)
+
+          await db.execAsync("COMMIT;");     
+          refRBSheet.current.close()
+          fetch()
+
+          // try {
+          //   await db.transactionAsync(async (tx) => {
+          //     await tx.execAsync(
+          //       "INSERT INTO products (name, price, stock, image) VALUES (?, ?, ?, ?);",
+          //       [name, price, stock, imageLink]
+          //     );
+          //   });      
+  
+          //   refRBSheet.current.close()
+          //   fetch()
+          // } catch (error) {
+          //   console.log("ERROR: ", error.message);
+          // }
     }
 
     return (

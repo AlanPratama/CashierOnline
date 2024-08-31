@@ -52,9 +52,14 @@ export default function BottomSheetDeleteProduct({ fetch, db, refRBSheet, delete
 
 const DeleteProductComp = ({ fetch, db, refRBSheet, deleteProduct }) => {
     const submit = async () => {
+      
+        await db.execAsync("BEGIN TRANSACTION;");
+      
         await db.execAsync(`
           DELETE FROM products WHERE id = ${deleteProduct.id};
         `)
+        
+        await db.execAsync("COMMIT;");     
 
         refRBSheet.current.close()
         fetch()

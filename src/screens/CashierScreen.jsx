@@ -6,6 +6,7 @@ import {
   ScrollView,
   Image,
   StyleSheet,
+  StatusBar,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import BottomNavigation from "../components/BottomNavigation";
@@ -27,13 +28,25 @@ export default function CashierScreen() {
   const db = useSQLiteContext();
 
   const fetch = async () => {
-    const productStatement = await db.prepareAsync(`
-      SELECT * FROM products;
-    `);
-
-    const execProduct = await productStatement.executeAsync();
-    const resProduct = await execProduct.getAllAsync();
-    setProductList(resProduct);
+    const productStatement = await db.prepareAsync("SELECT * FROM products;");
+    const tsStatement = await db.prepareAsync("SELECT * FROM transactions;");
+  
+    try {
+      const execProduct = await productStatement.executeAsync();
+      const exec = await tsStatement.executeAsync();
+  
+      const resProduct = await execProduct.getAllAsync();
+      const rests = await exec.getAllAsync();
+  
+      console.log(rests);
+      setProductList(resProduct);
+    } catch (error) {
+      console.error("ERROR: ", error.message);
+    } finally {
+      // Finalisasi semua statements
+      await productStatement.finalizeAsync();
+      await tsStatement.finalizeAsync();
+    }
   };
 
   const handleSubmit = (product) => {
@@ -73,27 +86,52 @@ export default function CashierScreen() {
     rbSheet.current.close()
   };
 
+  const generateTransactionCode = () => {
+    const timestamp = Date.now().toString(36);
+    const randomString = Math.random().toString(36).slice(2, 10);
+    return `TX-${timestamp}-${randomString}`.toUpperCase();
+  };
+
   const handleSimpan = async () => {
-    if (buyProductList.length < 1) {
-      setErrMessage("Pilih product terlebih dahulu");
-      return;
+    try {
+      if (buyProductList.length < 1) {
+        setErrMessage("Pilih product terlebih dahulu");
+        return;
+      }
+      const transactionCode = generateTransactionCode();
+
+      await db.execAsync("BEGIN TRANSACTION;");
+
+      for(const product of buyProductList) {
+        await db.execAsync(`
+          INSERT INTO transactions 
+          (codeTransaction, productId, quantity, totalPrice) 
+          VALUES 
+          ('${transactionCode}', ${product.id}, ${product.quantity}, ${product.price * product.quantity});
+        `);
+        console.log("BERHASIL!");
+      }
+
+      await db.execAsync("COMMIT;");
+
+      setSelectedProduct(null);
+      setQuantity(1);
+      setErrMessage("");
+      setBuyProductList([]);
+      setTotalPrice(0);
+      fetch()
+      rbSheet.current.close();
+    } catch (error) {
+      console.log("ERROR: ", error.message);    
     }
-  
-    setSelectedProduct(null);
-    setQuantity(1);
-    setErrMessage("");
-    setBuyProductList([]);
-    setTotalPrice(0);
-    fetch()
-    rbSheet.current.close();
   }
 
-  const formatRp = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-    }).format(price);
-  };
+  // const formatRp = (price) => {
+  //   return new Intl.NumberFormat("id-ID", {
+  //     style: "currency",
+  //     currency: "IDR",
+  //   }).format(price);
+  // };
 
   useEffect(() => {
     fetch();
@@ -101,7 +139,8 @@ export default function CashierScreen() {
 
   return (
     <View className="flex-1">
-      <View className="mt-14">
+      <StatusBar barStyle={"light-content"} />
+      <View className="mt-6">
         <View className="px-4">
           <View className="mb-2">
             <View className="flex flex-row justify-between items-center gap-4 w-full">
@@ -148,7 +187,7 @@ export default function CashierScreen() {
                 />
               </View>
               <TextInput
-                className="w-[25%]"
+                className="w-[25%] text-center"
                 value={`${quantity}`}
                 onChangeText={setQuantity}
                 placeholder="Jumlah"
@@ -177,21 +216,21 @@ export default function CashierScreen() {
 
           <View className="my-6">
             <Text className="text-lg font-bold text-neutral-800">
-              TOTAL HARGA: <Text className="text-2xl">{formatRp(totalPrice)}</Text>
+              TOTAL HARGA: <Text className="text-2xl">Rp {totalPrice.toLocaleString("id-ID")}</Text>
             </Text>
           </View>
 
           <View>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              className="rounded-[10px] h-[350px]"
+              className="rounded-[10px] h-[370px]"
             >
               {buyProductList &&
-                buyProductList.map((item) => {
+                buyProductList.map((item, index) => {
                   return (
                     <>
                       <TouchableOpacity
-                        key={item.id}
+                        key={index}
                         onPress={() => handleDeleteSheet(item)}
                         className="flex-row justify-between items-center my-4 bg-white rounded-2xl py-2 px-4 gap-2"
                       >
@@ -200,7 +239,7 @@ export default function CashierScreen() {
                             {item.name}
                           </Text>
                           <Text className="text-[15px] mb-2 font-medium text-neutral-800">
-                            {formatRp(item.price * item.quantity)}
+                            Rp {(item.price * item.quantity).toLocaleString("id-ID")}
                           </Text>
                         </View>
                         <Text className="font-bold text-xl">

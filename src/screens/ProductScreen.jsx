@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, StatusBar } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import BottomNavigation from "../components/BottomNavigation";
 import BottomSheetProduct from "../components/BottomSheetProduct";
@@ -16,11 +16,17 @@ export default function ProductScreen() {
   const [deleteProduct, setDeleteProduct] = useState({});
 
   const fetch = async () => {
-    const productStatement = await db.prepareAsync("SELECT * FROM products ORDER BY id DESC");
-    const execProduct = await productStatement.executeAsync();
-    const resProduct = await execProduct.getAllAsync();
-    setProducts(resProduct);
-    console.log(resProduct);
+    try {
+      const productStatement = await db.prepareAsync("SELECT * FROM products ORDER BY id DESC");
+      const execProduct = await productStatement.executeAsync();
+      const resProduct = await execProduct.getAllAsync();
+      await productStatement.finalizeAsync()
+
+      setProducts(resProduct);
+      console.log(resProduct);
+    } catch (error) {
+      console.log("ERROR: ", error.message);
+    } 
   };
 
   const formatRp = (price) => {
@@ -49,7 +55,8 @@ export default function ProductScreen() {
 
   return (
     <View className="flex-1">
-      <View className="mt-16 px-3 pb-[130px]">
+      <StatusBar barStyle={"light-content"} />
+      <View className="mt-6 px-3 pb-[130px]">
       <BottomSheetProduct fetch={fetch} db={db} />
         <View className="mt-4">
           <ScrollView

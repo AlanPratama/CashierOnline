@@ -3,7 +3,7 @@ import { Button, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View 
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-export default function BottomSheetUpdateProduct({ fetch, db, refRBSheet, updateProduct }) {
+export default function BottomSheetUpdateStore({ db, refRBSheet, store, setStore }) {
     
   return (
     <View>
@@ -33,7 +33,7 @@ export default function BottomSheetUpdateProduct({ fetch, db, refRBSheet, update
             marginVertical: 10,
           },
           container: {
-            height: "72%",
+            height: "48%",
           },
         }}
         customModalProps={{
@@ -42,7 +42,7 @@ export default function BottomSheetUpdateProduct({ fetch, db, refRBSheet, update
         height={500}
         openDuration={250}
       >
-        <UpdateProductComp fetch={fetch} db={db} refRBSheet={refRBSheet} updateProduct={updateProduct} />
+        <UpdateStoreComp db={db} refRBSheet={refRBSheet} store={store} setStore={setStore} />
       </RBSheet>
     </View>
   )
@@ -50,23 +50,21 @@ export default function BottomSheetUpdateProduct({ fetch, db, refRBSheet, update
 
 
 
-const UpdateProductComp = ({ fetch, db, refRBSheet, updateProduct }) => {
-    const [name, setName] = useState(updateProduct.name)
-    const [price, setPrice] = useState(updateProduct.price)
-    const [stock, setStock] = useState(updateProduct.stock)
-    const [imageLink, setImageLink] = useState(updateProduct.image)
+const UpdateStoreComp = ({ fetch, db, refRBSheet, store, setStore }) => {
+    const [name, setName] = useState(store.name)
+    const [owner, setOwner] = useState(store.owner)
 
     const submit = async () => {
-        await db.execAsync("BEGIN TRANSACTION;");
+        const statement = await db.prepareAsync(
+          `UPDATE stores SET name = '${name}', owner = '${owner}';`
+        )
 
-        await db.execAsync(`
-            UPDATE products SET name = '${name}', price = ${price}, stock = ${stock}, image = '${imageLink}' WHERE id = ${updateProduct.id};
-        `)
+        await statement.executeAsync();
+        await statement.finalizeAsync();
 
-        await db.execAsync("COMMIT;");     
+        setStore({name, owner})
 
         refRBSheet.current.close()
-        fetch()
     }
 
     return (
@@ -81,12 +79,12 @@ const UpdateProductComp = ({ fetch, db, refRBSheet, updateProduct }) => {
         <View style={{ marginTop: 26 }}>
           <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
             <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Nama Product
+              Nama Bisnis
             </Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder="Masukkan Nama Product...."
+              placeholder="Masukkan Nama Bisnis...."
               style={{
                 padding: 10,
                 paddingHorizontal: 16,
@@ -99,13 +97,12 @@ const UpdateProductComp = ({ fetch, db, refRBSheet, updateProduct }) => {
 
           <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
             <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Harga Product
+              Nama Owner
             </Text>
             <TextInput
-              value={`${price}`}
-              onChangeText={setPrice}
-              placeholder="Masukkan Harga Product...."
-              keyboardType='numeric'
+              value={owner}
+              onChangeText={setOwner}
+              placeholder="Masukkan Nama Owner...."
               style={{
                 padding: 10,
                 paddingHorizontal: 16,
@@ -115,59 +112,6 @@ const UpdateProductComp = ({ fetch, db, refRBSheet, updateProduct }) => {
               }}
             />
           </View>
-
-          <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
-            <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Stok Product
-            </Text>
-            <TextInput
-                value={`${stock}`}
-                onChangeText={setStock}
-              placeholder="Masukkan Stok Product...."
-              keyboardType='numeric'
-              style={{
-                padding: 10,
-                paddingHorizontal: 16,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "gray",
-              }}
-            />
-          </View>
-  
-          <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
-            <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Link Gambar Product (Opsional)
-            </Text>
-            <TextInput
-                value={imageLink}
-                onChangeText={setImageLink}
-              placeholder="Masukkan Link Gambar Product...."
-              style={{
-                padding: 10,
-                paddingHorizontal: 16,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "gray",
-              }}
-            />
-          </View>
-
-          {/* <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
-            <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Deskripsi Product (Opsional)
-            </Text>
-            <TextInput
-              placeholder="Masukkan Deskripsi Product...."
-              style={{
-                padding: 10,
-                paddingHorizontal: 16,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "gray",
-              }}
-            />
-          </View> */}
   
           <View
             style={{

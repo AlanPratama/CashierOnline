@@ -66,7 +66,7 @@ const DeleteProductComp = ({ refRBSheet, deleteProduct, handleDeleteProduct }) =
             <Text
             className="font-semibold capitalize text-lg text-neutral-800"
             >
-              Apakah anda yakin ingin menghapus produk <Text className="text-red-500 font-bold">{deleteProduct.name}</Text>?
+              Apakah anda yakin ingin menghapus produk <Text className="text-red-500 font-bold">{deleteProduct.name}</Text> dari daftar kasir?
             </Text>
           </View>
 
