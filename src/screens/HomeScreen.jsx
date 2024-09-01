@@ -212,7 +212,7 @@ export default function HomeScreen() {
 
           <View className="bg-blue-300 w-[48%] rounded-lg p-4 shadow-lg">
             <Text className="text-lg font-bold text-neutral-800">
-              Rp {totalProfit.toLocaleString("id-ID")}
+              Rp {totalProfit ? totalProfit.toLocaleString("id-ID") : 0}
             </Text>
             <Text className="text-lg font-medium text-neutral-800">
               Total Profit

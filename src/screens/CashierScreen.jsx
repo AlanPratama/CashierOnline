@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { FadeIn } from "react-native-reanimated";
 import SelectDropdown from "react-native-select-dropdown";
@@ -28,13 +28,15 @@ export default function CashierScreen() {
   const db = useSQLiteContext();
 
   const fetch = async () => {
-    const productStatement = await db.prepareAsync("SELECT * FROM products;");
-  
+    const productStatement = await db.prepareAsync(
+      "SELECT * FROM products WHERE stock > 0;"
+    );
+
     try {
       const execProduct = await productStatement.executeAsync();
-  
+
       const resProduct = await execProduct.getAllAsync();
-  
+
       setProductList(resProduct);
     } catch (error) {
       console.error("ERROR: ", error.message);
@@ -62,7 +64,7 @@ export default function CashierScreen() {
     const newProductList = [...buyProductList, productObj];
     setBuyProductList(newProductList);
     setProductList(productList.filter((item) => item.id !== product.id));
-    setTotalPrice(totalPrice + (product.price * quantity));
+    setTotalPrice(totalPrice + product.price * quantity);
 
     setSelectedProduct(null);
     setQuantity(1);
@@ -71,13 +73,15 @@ export default function CashierScreen() {
 
   const handleDeleteSheet = (deleteProduct) => {
     setDeleteProduct(deleteProduct);
-    rbSheet.current.open()
-  }
+    rbSheet.current.open();
+  };
   const handleDeleteProduct = () => {
-    setBuyProductList(buyProductList.filter((product) => product.id !== deleteProduct.id));
-    setProductList([...productList, deleteProduct])
-    setTotalPrice(totalPrice - (deleteProduct.price * deleteProduct.quantity))
-    rbSheet.current.close()
+    setBuyProductList(
+      buyProductList.filter((product) => product.id !== deleteProduct.id)
+    );
+    setProductList([...productList, deleteProduct]);
+    setTotalPrice(totalPrice - deleteProduct.price * deleteProduct.quantity);
+    rbSheet.current.close();
   };
 
   const generateTransactionCode = () => {
@@ -96,12 +100,14 @@ export default function CashierScreen() {
 
       // await db.execAsync("BEGIN TRANSACTION;");
 
-      for(const product of buyProductList) {
+      for (const product of buyProductList) {
         const pre1 = await db.prepareAsync(`
           INSERT INTO transactions 
           (codeTransaction, productId, quantity, totalPrice) 
           VALUES 
-          ('${transactionCode}', ${product.id}, ${product.quantity}, ${product.price * product.quantity});
+          ('${transactionCode}', ${product.id}, ${product.quantity}, ${
+          product.price * product.quantity
+        });
         `);
 
         pre1.executeAsync();
@@ -109,7 +115,7 @@ export default function CashierScreen() {
 
         const pre2 = await db.prepareAsync(`
           UPDATE products SET stock = stock - ${product.quantity} WHERE id = ${product.id};  
-        `)
+        `);
 
         pre2.executeAsync();
         pre2.finalizeAsync();
@@ -123,23 +129,33 @@ export default function CashierScreen() {
       setErrMessage("");
       setBuyProductList([]);
       setTotalPrice(0);
-      fetch()
+      fetch();
       rbSheet.current.close();
     } catch (error) {
-      console.log("ERROR: ", error.message);    
+      console.log("ERROR: ", error.message);
     }
-  }
+  };
 
   useEffect(() => {
     fetch();
   }, []);
 
-  
   return (
     <View className="flex-1">
       <StatusBar barStyle={"light-content"} />
       <View entering={FadeIn.delay(300)} className="mt-6">
         <View className="px-4">
+          <TouchableOpacity
+            disabled={buyProductList.length > 0}
+            className={`bg-blue-500 mb-6 px-4 py-2 rounded-lg ${
+              buyProductList.length > 0 ? "opacity-50" : ""
+            }`}
+            onPress={fetch}
+          >
+            <Text className="text-white font-bold text-center text-[14px]">
+              <Icon name="refresh" size={14} color={"#ffffff"} /> Refresh Data
+            </Text>
+          </TouchableOpacity>
           <View className="mb-2">
             <View className="flex flex-row justify-between items-center gap-4 w-full">
               <View className="border border-gray-500 rounded-[10px] w-[70%]">
@@ -214,52 +230,59 @@ export default function CashierScreen() {
 
           <View className="my-6">
             <Text className="text-lg font-bold text-neutral-800">
-              TOTAL HARGA: <Text className="text-2xl">Rp {totalPrice.toLocaleString("id-ID")}</Text>
+              TOTAL HARGA:{" "}
+              <Text className="text-2xl">
+                Rp {totalPrice.toLocaleString("id-ID")}
+              </Text>
             </Text>
           </View>
 
           <View>
             <ScrollView
               showsVerticalScrollIndicator={false}
-              className="rounded-[10px] h-[370px]"
+              className="rounded-[10px] h-[310px]"
             >
               {buyProductList &&
                 buyProductList.map((item, index) => {
                   return (
-                      <TouchableOpacity
-                        key={index}
-                        onPress={() => handleDeleteSheet(item)}
-                        className="flex-row justify-between items-center my-4 bg-white rounded-2xl py-2 px-4 gap-2"
-                      >
-                        <View>
-                          <Text className="text-lg font-bold text-neutral-800">
-                            {item.name}
-                          </Text>
-                          <Text className="text-[15px] mb-2 font-medium text-neutral-800">
-                            Rp {(item.price * item.quantity).toLocaleString("id-ID")}
-                          </Text>
-                        </View>
-                        <Text className="font-bold text-xl">
-                          {item.quantity}
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => handleDeleteSheet(item)}
+                      className="flex-row justify-between items-center my-4 bg-white rounded-2xl py-2 px-4 gap-2"
+                    >
+                      <View>
+                        <Text className="text-lg font-bold text-neutral-800">
+                          {item.name}
                         </Text>
-                      </TouchableOpacity>
+                        <Text className="text-[15px] mb-2 font-medium text-neutral-800">
+                          Rp{" "}
+                          {(item.price * item.quantity).toLocaleString("id-ID")}
+                        </Text>
+                      </View>
+                      <Text className="font-bold text-xl">{item.quantity}</Text>
+                    </TouchableOpacity>
                   );
                 })}
             </ScrollView>
           </View>
-          {
-            buyProductList.length > 0 && (
-              <TouchableOpacity onPress={() => handleSimpan()} className="mt-4 w-full bg-green-500 py-3.5 rounded-[10px]">
+          {buyProductList.length > 0 && (
+            <TouchableOpacity
+              onPress={() => handleSimpan()}
+              className="mt-4 w-full bg-green-500 py-3.5 rounded-[10px]"
+            >
               <Text className="text-white font-bold text-sm text-center">
                 SIMPAN
               </Text>
             </TouchableOpacity>
-            )
-          }
+          )}
         </View>
       </View>
 
-      <BottomSheetDeleteItem refRBSheet={rbSheet} deleteProduct={deleteProduct} handleDeleteProduct={handleDeleteProduct} />
+      <BottomSheetDeleteItem
+        refRBSheet={rbSheet}
+        deleteProduct={deleteProduct}
+        handleDeleteProduct={handleDeleteProduct}
+      />
       <BottomNavigation path="Cashier" />
     </View>
   );

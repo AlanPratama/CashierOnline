@@ -11,7 +11,7 @@ const Tab = createNativeStackNavigator();
 const AppNavigation = () => {
   return (
     <NavigationContainer>
-        <Tab.Navigator screenOptions={{ headerShown: false }} initialRouteName="Home">
+        <Tab.Navigator screenOptions={{ headerShown: false }} initialRouteName="GettingStarted">
           <Tab.Screen name='Home' component={HomeScreen}/>
           <Tab.Screen name='GettingStarted' component={GettingStartedScreen}/>
           <Tab.Screen name='Product' component={ProductScreen}/>

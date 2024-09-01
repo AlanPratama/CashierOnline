@@ -30,13 +30,6 @@ export default function ProductScreen() {
     } 
   };
 
-  const formatRp = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-    }).format(price);
-  };
-
   const refRBSheet = useRef();
   const refRBSheetDelete = useRef();
 
@@ -61,15 +54,21 @@ export default function ProductScreen() {
       <View className="flex flex-row justify-center items-center gap-2">
       <BottomSheetProduct fetch={fetch} db={db} />
       <View className="mb-2">
-      <TouchableOpacity onPress={fetch} className="bg-blue-500 px-4 py-2 rounded-lg">
-            <Text className="text-white font-semibold text-[14px]"><Icon name="refresh" size={14} color={"#ffffff"} /> Refresh Data</Text>
+        <TouchableOpacity
+            onPress={fetch}
+            className="bg-blue-600 flex flex-row justify-center items-center p-2 rounded-lg"
+        >
+            <Icon name="refresh" size={20} color={"#ffffff"} />
+            <Text className="text-white text-center ml-2 font-bold">
+            Refresh Data
+            </Text>
         </TouchableOpacity>
       </View>
       </View>
         <View className="mt-4">
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 30 }}
+            contentContainerStyle={{ paddingBottom: 50 }}
           >
             {products.map((product) => (
               <Animated.View entering={FadeIn.delay(800 / product.id)}
@@ -92,7 +91,7 @@ export default function ProductScreen() {
                     Stok: {product.stock}
                   </Text>
                   <Text className="text-[15px] mb-2 font-medium text-neutral-800">
-                    {formatRp(product.price)}
+                    Rp {product.price ? product.price.toLocaleString("id-ID") : 0}
                   </Text>
                   <View className="flex flex-row justify-start items-center gap-2">
                     <TouchableOpacity

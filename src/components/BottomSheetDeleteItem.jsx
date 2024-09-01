@@ -40,7 +40,7 @@ export default function BottomSheetDeleteItem({ refRBSheet, deleteProduct, handl
           animationType: "slide",
         }}
         height={500}
-        openDuration={250}
+        openDuration={150}
       >
         <DeleteProductComp refRBSheet={refRBSheet} deleteProduct={deleteProduct} handleDeleteProduct={handleDeleteProduct} />
       </RBSheet>

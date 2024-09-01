@@ -7,7 +7,6 @@ export default function App() {
   const fetch = async () => {
     const db = await SQLite.openDatabaseAsync("cashier.db");
   
-    // Membungkus perintah CREATE TABLE dalam transaksi
     try {
       await db.execAsync("BEGIN TRANSACTION;"); 
   

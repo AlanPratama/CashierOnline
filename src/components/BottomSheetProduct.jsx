@@ -12,8 +12,8 @@ export default function BottomSheetProduct({ fetch, db }) {
             className="bg-indigo-600 flex flex-row justify-center items-center p-2 rounded-lg"
         >
             <Icon name="plus" size={22} color={"#ffffff"} />
-            <Text className="text-white text-center ml-2 font-extrabold">
-            TAMBAH PRODUK
+            <Text className="text-white text-center ml-2 font-bold">
+            Tambah Produk
             </Text>
         </TouchableOpacity>
 
@@ -150,7 +150,7 @@ const AddProductComp = ({ fetch, db, refRBSheet }) => {
   
           <View style={{ paddingHorizontal: 18, marginBottom: 25 }}>
             <Text style={{ fontWeight: "600", fontSize: 16, marginBottom: 8 }}>
-              Link Gambar Product (Opsional)
+              Link Gambar (Opsional. Note: Link Wajib Diawali Dengan https://)
             </Text>
             <TextInput
                 value={imageLink}

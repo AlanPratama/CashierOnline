@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CashierOnline",
-    "slug": "CashierOnline",
+    "name": "Cashier Online",
+    "slug": "Cashier-Online",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,13 +18,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.alanpratama.CashierOnline"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a0ebf62f-e756-4e91-8c8f-2ef9c836400e"
+      }
+    }
   }
 }
