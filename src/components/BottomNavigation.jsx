@@ -11,7 +11,7 @@ export default function BottomNavigation({ path }) {
         {/* Home Link */}
         <Link to={"/Home"}>
           <View className={`flex justify-center items-center p-1.5 ${path === "Home" && "bg-blue-200 rounded-lg"}`}>
-            <Icon name="home" size={20} color={path === "Home" ? "#1E40AF" : "#262626"} />
+            <Icon name="home" size={24} color={path === "Home" ? "#1E40AF" : "#262626"} />
             <Text className={`font-bold text-sm ${path === "Home" ? "text-blue-600" : "text-neutral-800"}`}>Home</Text>
           </View>
         </Link>

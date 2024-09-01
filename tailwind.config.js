@@ -1,6 +1,6 @@
 // nativewind.config.js
 module.exports = {
-  content: ["./App.js", "./*/**/*.jsx"],
+  content: ["./App.js", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {},
   },

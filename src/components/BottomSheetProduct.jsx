@@ -9,7 +9,7 @@ export default function BottomSheetProduct({ fetch, db }) {
     <View>
         <TouchableOpacity
             onPress={() => refRBSheet.current.open()}
-            className="bg-blue-600 flex flex-row justify-center items-center p-2 rounded-lg"
+            className="bg-indigo-600 flex flex-row justify-center items-center p-2 rounded-lg"
         >
             <Icon name="plus" size={22} color={"#ffffff"} />
             <Text className="text-white text-center ml-2 font-extrabold">

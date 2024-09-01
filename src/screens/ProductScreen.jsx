@@ -7,6 +7,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import ImgDefault from "../../assets/image.png";
 import BottomSheetUpdateProduct from "../components/BottomSheetUpdateProduct";
 import BottomSheetDeleteProduct from "../components/BottomSheetDeleteProduct";
+import Animated, { FadeIn } from "react-native-reanimated";
 
 export default function ProductScreen() {
   const db = useSQLiteContext();
@@ -57,14 +58,21 @@ export default function ProductScreen() {
     <View className="flex-1">
       <StatusBar barStyle={"light-content"} />
       <View className="mt-6 px-3 pb-[130px]">
+      <View className="flex flex-row justify-center items-center gap-2">
       <BottomSheetProduct fetch={fetch} db={db} />
+      <View className="mb-2">
+      <TouchableOpacity onPress={fetch} className="bg-blue-500 px-4 py-2 rounded-lg">
+            <Text className="text-white font-semibold text-[14px]"><Icon name="refresh" size={14} color={"#ffffff"} /> Refresh Data</Text>
+        </TouchableOpacity>
+      </View>
+      </View>
         <View className="mt-4">
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 30 }}
           >
             {products.map((product) => (
-              <View
+              <Animated.View entering={FadeIn.delay(800 / product.id)}
                 key={product.id}
                 className="flex-row justify-start items-start bg-white rounded-2xl p-2 mb-4 gap-2"
               >
@@ -104,7 +112,7 @@ export default function ProductScreen() {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </View>
+              </Animated.View>
             ))}
           </ScrollView>
         </View>

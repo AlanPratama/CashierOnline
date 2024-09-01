@@ -1,19 +1,19 @@
+import { useSQLiteContext } from "expo-sqlite";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Image,
-  StyleSheet,
-  StatusBar,
+  View
 } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import BottomNavigation from "../components/BottomNavigation";
-import BottomSheetDeleteItem from "../components/BottomSheetDeleteItem";
-import { useSQLiteContext } from "expo-sqlite";
+import { FadeIn } from "react-native-reanimated";
 import SelectDropdown from "react-native-select-dropdown";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import BottomNavigation from "../components/BottomNavigation";
+import BottomSheetDeleteItem from "../components/BottomSheetDeleteItem";
 
 export default function CashierScreen() {
   const rbSheet = useRef(null);
@@ -29,23 +29,17 @@ export default function CashierScreen() {
 
   const fetch = async () => {
     const productStatement = await db.prepareAsync("SELECT * FROM products;");
-    const tsStatement = await db.prepareAsync("SELECT * FROM transactions;");
   
     try {
       const execProduct = await productStatement.executeAsync();
-      const exec = await tsStatement.executeAsync();
   
       const resProduct = await execProduct.getAllAsync();
-      const rests = await exec.getAllAsync();
   
-      console.log(rests);
       setProductList(resProduct);
     } catch (error) {
       console.error("ERROR: ", error.message);
     } finally {
-      // Finalisasi semua statements
       await productStatement.finalizeAsync();
-      await tsStatement.finalizeAsync();
     }
   };
 
@@ -100,19 +94,29 @@ export default function CashierScreen() {
       }
       const transactionCode = generateTransactionCode();
 
-      await db.execAsync("BEGIN TRANSACTION;");
+      // await db.execAsync("BEGIN TRANSACTION;");
 
       for(const product of buyProductList) {
-        await db.execAsync(`
+        const pre1 = await db.prepareAsync(`
           INSERT INTO transactions 
           (codeTransaction, productId, quantity, totalPrice) 
           VALUES 
           ('${transactionCode}', ${product.id}, ${product.quantity}, ${product.price * product.quantity});
         `);
+
+        pre1.executeAsync();
+        pre1.finalizeAsync();
+
+        const pre2 = await db.prepareAsync(`
+          UPDATE products SET stock = stock - ${product.quantity} WHERE id = ${product.id};  
+        `)
+
+        pre2.executeAsync();
+        pre2.finalizeAsync();
         console.log("BERHASIL!");
       }
 
-      await db.execAsync("COMMIT;");
+      // await db.execAsync("COMMIT;");
 
       setSelectedProduct(null);
       setQuantity(1);
@@ -126,21 +130,15 @@ export default function CashierScreen() {
     }
   }
 
-  // const formatRp = (price) => {
-  //   return new Intl.NumberFormat("id-ID", {
-  //     style: "currency",
-  //     currency: "IDR",
-  //   }).format(price);
-  // };
-
   useEffect(() => {
     fetch();
   }, []);
 
+  
   return (
     <View className="flex-1">
       <StatusBar barStyle={"light-content"} />
-      <View className="mt-6">
+      <View entering={FadeIn.delay(300)} className="mt-6">
         <View className="px-4">
           <View className="mb-2">
             <View className="flex flex-row justify-between items-center gap-4 w-full">
@@ -228,7 +226,6 @@ export default function CashierScreen() {
               {buyProductList &&
                 buyProductList.map((item, index) => {
                   return (
-                    <>
                       <TouchableOpacity
                         key={index}
                         onPress={() => handleDeleteSheet(item)}
@@ -246,7 +243,6 @@ export default function CashierScreen() {
                           {item.quantity}
                         </Text>
                       </TouchableOpacity>
-                    </>
                   );
                 })}
             </ScrollView>

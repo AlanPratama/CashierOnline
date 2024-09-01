@@ -1,4 +1,3 @@
-import { useNavigation } from "@react-navigation/native";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -10,6 +9,7 @@ import {
   View
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import Animated, { FadeIn } from "react-native-reanimated";
 import Icon from "react-native-vector-icons/FontAwesome";
 import BottomNavigation from "../components/BottomNavigation";
 import BottomSheetUpdateStore from "../components/BottomSheetUpdateStore";
@@ -23,10 +23,14 @@ export default function HomeScreen() {
   const [weeklyTransactions, setWeeklyTransactions] = useState([]);
 
   const [transactions, setTransactions] = useState([]);
-  const [products, setProducts] = useState([]);
 
   const db = useSQLiteContext();
   const refRbSheet = useRef(null)
+
+  useEffect(() => {
+    fetch();
+    fetchWeeklyTransactions();
+  }, []);
 
   // INSERT INTO products (name, description, price, stock) VALUES ('Pensil', 'Pensil', 2000, 10), ('Penghapus', 'Penghapus', 1000, 10), ('Penggaris', 'Penggaris', 5000, 10), ('Buku', 'Buku', 10000, 10), ('Indomie', 'indomie enak', 3000, 10);
 
@@ -55,7 +59,6 @@ export default function HomeScreen() {
       "SELECT COUNT(DISTINCT codeTransaction) FROM transactions"
     );
 
-    const productStatement = await db.prepareAsync("SELECT * FROM products");
     const transactionStatement = await db.prepareAsync(`
       SELECT 
         transactions.codeTransaction,
@@ -70,6 +73,8 @@ export default function HomeScreen() {
         products 
       ON 
         transactions.productId = products.id
+      WHERE 
+        date(transactions.timestamps) = date('now')
       ORDER BY 
         transactions.timestamps DESC;
       `);
@@ -77,17 +82,18 @@ export default function HomeScreen() {
     try {
       const execTotalPr = await profitStatement.executeAsync();
       const execTotalTr = await totalTransactionStatement.executeAsync();
-      const execTotalPrd = await productStatement.executeAsync();
       const execTotalTran = await transactionStatement.executeAsync();
 
       const resPr = await execTotalPr.getAllAsync();
       const resTr = await execTotalTr.getAllAsync();
-      const resPrd = await execTotalPrd.getAllAsync();
       const resTran = await execTotalTran.getAllAsync();
+
+      await profitStatement.finalizeAsync();
+      await totalTransactionStatement.finalizeAsync();
+      await transactionStatement.finalizeAsync();
 
       setTotalProfit(resPr[0]["SUM(totalPrice)"]);
       setTotalTransaction(resTr[0]["COUNT(DISTINCT codeTransaction)"]);
-      setProducts(resPrd);
       setTransactions(resTran);
 
       // console.log("PROFIT: ", resPr[0]["SUM(totalPrice)"]);
@@ -96,12 +102,7 @@ export default function HomeScreen() {
       // console.log("TRAN: ", resTran);
     } catch (error) {
       console.error("ERROR: ", error.message);
-    } finally {
-      await profitStatement.finalizeAsync();
-      await totalTransactionStatement.finalizeAsync();
-      await productStatement.finalizeAsync();
-      await transactionStatement.finalizeAsync();
-    }
+    } 
   };
 
   const fetchWeeklyTransactions = async () => {
@@ -149,7 +150,7 @@ export default function HomeScreen() {
     backgroundColor: "#e26a00",
     backgroundGradientFrom: "#fb8c00",
     backgroundGradientTo: "#ffa726",
-    decimalPlaces: 0, // optional, defaults to 2dp
+    decimalPlaces: 0,
     color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
     style: {
       borderRadius: 16,
@@ -178,17 +179,14 @@ export default function HomeScreen() {
   
   
 
-  useEffect(() => {
-    fetch();
-    fetchWeeklyTransactions();
-  }, []);
+  
 
   return (
     <>
     <ScrollView className="flex-1">
     <StatusBar style="auto" />
       <View className="mt-6">
-        <View className="px-3 pb-2 flex flex-wrap flex-row justify-between items-center gap-2">
+        <Animated.View entering={FadeIn.delay(300)} className="px-3 pb-2 flex flex-wrap flex-row justify-between items-center gap-2">
           <TouchableOpacity onPress={handleSheetStore}>
           <Text className="text-[18px] font-bold text-neutral-700">
             {store.name}
@@ -200,9 +198,9 @@ export default function HomeScreen() {
           <TouchableOpacity onPress={handleRefresh} className="bg-blue-500 px-4 py-2 rounded-lg">
             <Text className="text-white font-semibold text-[14px]"><Icon name="refresh" size={14} color={"#ffffff"} /> Refresh Data</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
-        <View className="flex flex-row justify-evenly items-center gap-2 pt-2 px-3">
+        <Animated.View entering={FadeIn.delay(400)} className="flex flex-row justify-evenly items-center gap-2 pt-2 px-3">
           <View className="bg-blue-300 w-[48%] rounded-lg p-4 shadow-lg">
             <Text className="text-lg font-bold text-neutral-800">
               {totalTransaction}
@@ -220,12 +218,12 @@ export default function HomeScreen() {
               Total Profit
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
-        <View className="my-4 px-3">
+        <Animated.View entering={FadeIn.delay(500)} className="my-4 px-3">
           <Text className="text-start text-lg font-bold mb-2 text-neutral-800">Statistik Selama 7 Hari</Text>
         <View className="flex justify-center items-center shadow-lg ">
-          {weeklyTransactions.length > 0 && ( // Conditionally render chart only if data is available
+          {weeklyTransactions.length > 0 && (
             <LineChart
             style={{ borderRadius: 10 }}
               data={data}
@@ -236,10 +234,10 @@ export default function HomeScreen() {
               />
             )}
         </View>
-            </View>
+            </Animated.View>
 
-        <View className="px-3 pb-[100px]">
-        <Text className="text-start text-lg font-bold mb-2 text-neutral-800">Daftar Seluruh Transaksi</Text>
+        <Animated.View entering={FadeIn.delay(700)} className="px-3 pb-[100px]">
+        <Text className="text-start text-lg font-bold mb-2 text-neutral-800">Transaksi Hari Ini</Text>
             <ScrollView horizontal>
               <View>
                 {/* Header Tabel */}
@@ -281,7 +279,7 @@ export default function HomeScreen() {
                 }
               </View>
             </ScrollView>
-        </View>
+        </Animated.View>
 
         {/* <Image source={} className="w-40 h-40" /> */}
         {/* {

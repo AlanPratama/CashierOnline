@@ -50,7 +50,7 @@ export default function BottomSheetUpdateStore({ db, refRBSheet, store, setStore
 
 
 
-const UpdateStoreComp = ({ fetch, db, refRBSheet, store, setStore }) => {
+const UpdateStoreComp = ({ db, refRBSheet, store, setStore }) => {
     const [name, setName] = useState(store.name)
     const [owner, setOwner] = useState(store.owner)
 
