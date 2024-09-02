@@ -38,6 +38,7 @@ export default function App() {
 
 //       `);
 
+
       await db.execAsync(`
         CREATE TABLE IF NOT EXISTS stores (
           id INTEGER PRIMARY KEY AUTOINCREMENT,

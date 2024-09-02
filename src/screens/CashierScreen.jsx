@@ -1,6 +1,7 @@
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Image,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -238,7 +239,9 @@ export default function CashierScreen() {
           </View>
 
           <View>
-            <ScrollView
+            {
+              buyProductList.length > 0 ? (
+                <ScrollView
               showsVerticalScrollIndicator={false}
               className="rounded-[10px] h-[310px]"
             >
@@ -264,6 +267,13 @@ export default function CashierScreen() {
                   );
                 })}
             </ScrollView>
+              ) : (
+                <View className="pb-4 rounded-lg bg-white flex justify-center items-center">
+                <Image source={require("../../assets/notFound.png")} alt="Tidak Ada Transaksi" className="w-72 h-72" />
+                <Text className="font-bold text-neutral-700 text-xl">Tidak Ada Produk Di Kasir...</Text>
+              </View>
+              )
+            }
           </View>
           {buyProductList.length > 0 && (
             <TouchableOpacity

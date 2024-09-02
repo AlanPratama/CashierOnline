@@ -56,8 +56,13 @@ const DeleteProductComp = ({ fetch, db, refRBSheet, deleteProduct }) => {
         await db.execAsync("BEGIN TRANSACTION;");
       
         await db.execAsync(`
+          DELETE FROM transactions WHERE productId = ${deleteProduct.id};  
+        `)
+
+        await db.execAsync(`
           DELETE FROM products WHERE id = ${deleteProduct.id};
         `)
+
         
         await db.execAsync("COMMIT;");     
 
@@ -80,7 +85,7 @@ const DeleteProductComp = ({ fetch, db, refRBSheet, deleteProduct }) => {
             <Text
             className="font-semibold capitalize text-lg text-neutral-800"
             >
-              Apakah anda yakin ingin menghapus produk <Text className="text-red-500 font-bold">{deleteProduct.name}</Text>?
+              Apakah anda yakin ingin menghapus produk <Text className="text-red-500 font-bold">{deleteProduct.name}</Text>? Semua transaksi terkait produk ini akan di hapus
             </Text>
           </View>
 

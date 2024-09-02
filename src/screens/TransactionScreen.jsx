@@ -1,4 +1,4 @@
-import { View, Text, StatusBar, TouchableOpacity, ScrollView } from 'react-native'
+import { View, Text, StatusBar, TouchableOpacity, ScrollView, Image } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import BottomNavigation from '../components/BottomNavigation'
 import { useSQLiteContext } from 'expo-sqlite';
@@ -79,32 +79,39 @@ export default function TransactionScreen() {
                 </View>
 
                 {
-                  transactionsArray.map((group, groupIndex) => (
-                    group.map((transaction, index) => (
-                      <View
-                        key={`${groupIndex}-${index}`}
-                        className={`flex-row p-2 ${
-                          groupIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        }`}
-                      >
-                        <Text className="w-[180px] text-center">
-                          {transaction.codeTransaction}
-                        </Text>
-                        <Text className="w-40 text-center">
-                          {transaction.productName}
-                        </Text>
-                        <Text className="w-24 text-center">
-                          {transaction.quantity}
-                        </Text>
-                        <Text className="w-32 text-center">
-                          Rp {transaction.totalPrice.toLocaleString("id-ID")}
-                        </Text>
-                        <Text className="w-48 text-center">
-                          {transaction.timestamps}
-                        </Text>
-                      </View>
+                  transactionsArray.length > 0 ? (
+                    transactionsArray.map((group, groupIndex) => (
+                      group.map((transaction, index) => (
+                        <View
+                          key={`${groupIndex}-${index}`}
+                          className={`flex-row p-2 ${
+                            groupIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          }`}
+                        >
+                          <Text className="w-[180px] text-center">
+                            {transaction.codeTransaction}
+                          </Text>
+                          <Text className="w-40 text-center">
+                            {transaction.productName}
+                          </Text>
+                          <Text className="w-24 text-center">
+                            {transaction.quantity}
+                          </Text>
+                          <Text className="w-32 text-center">
+                            Rp {transaction.totalPrice.toLocaleString("id-ID")}
+                          </Text>
+                          <Text className="w-48 text-center">
+                            {transaction.timestamps}
+                          </Text>
+                        </View>
+                      ))
                     ))
-                  ))                            
+                  ) : (
+<View className="pb-4 rounded-lg bg-white flex justify-center items-center">
+                <Image source={require("../../assets/notFound.png")} alt="Tidak Ada Transaksi" className="w-72 h-72" />
+                <Text className="font-bold text-neutral-700 text-xl">Tidak Ada Transaksi...</Text>
+              </View>
+                  )                           
                 }
               </View>
             </ScrollView>

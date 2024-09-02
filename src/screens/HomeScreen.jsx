@@ -2,6 +2,7 @@ import { useSQLiteContext } from "expo-sqlite";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
+  Image,
   ScrollView,
   StatusBar,
   Text,
@@ -49,6 +50,10 @@ export default function HomeScreen() {
     const execStore = await storeStatement.executeAsync();
     const resStore = await execStore.getAllAsync();
     await storeStatement.finalizeAsync();
+
+    
+    
+    console.log("resStore[0]: ", resStore[0]);
     setStore(resStore[0]);
 
     const profitStatement = await db.prepareAsync(
@@ -94,7 +99,15 @@ export default function HomeScreen() {
 
       setTotalProfit(resPr[0]["SUM(totalPrice)"]);
       setTotalTransaction(resTr[0]["COUNT(DISTINCT codeTransaction)"]);
+
+      console.log('resPr[0]["SUM(totalPrice)"]: ', resPr[0]["SUM(totalPrice)"]);
+      console.log('resTr[0]["COUNT(DISTINCT codeTransaction)"]: ', resTr[0]["COUNT(DISTINCT codeTransaction)"]);
+      
+
+
       setTransactions(resTran);
+
+      
 
       // console.log("PROFIT: ", resPr[0]["SUM(totalPrice)"]);
       // console.log("TR: ", resTr[0]["COUNT(*)"]);
@@ -138,10 +151,10 @@ export default function HomeScreen() {
   const screenWidth = Dimensions.get("window").width;
 
   const data = {
-    // labels: weeklyTransactions.map(transaction => transaction.transaction_date), // tanggal transaksi
+    // labels: weeklyTransactions.map(transaction => transaction.transaction_date), 
     datasets: [
       {
-        data: weeklyTransactions.map((transaction) => transaction.total_price), // total harga transaksi per hari
+        data: weeklyTransactions.map((transaction) => transaction.total_price), 
       },
     ],
   };
@@ -250,32 +263,39 @@ export default function HomeScreen() {
                 </View>
 
                 {
-                  transactionsArray.map((group, groupIndex) => (
-                    group.map((transaction, index) => (
-                      <View
-                        key={`${groupIndex}-${index}`}
-                        className={`flex-row p-2 ${
-                          groupIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
-                        }`}
-                      >
-                        <Text className="w-[180px] text-center">
-                          {transaction.codeTransaction}
-                        </Text>
-                        <Text className="w-40 text-center">
-                          {transaction.productName}
-                        </Text>
-                        <Text className="w-24 text-center">
-                          {transaction.quantity}
-                        </Text>
-                        <Text className="w-32 text-center">
-                          Rp {transaction.totalPrice.toLocaleString("id-ID")}
-                        </Text>
-                        <Text className="w-48 text-center">
-                          {transaction.timestamps}
-                        </Text>
-                      </View>
-                    ))
-                  ))                            
+                  transactionsArray.length > 0 ? (
+                    transactionsArray.map((group, groupIndex) => (
+                      group.map((transaction, index) => (
+                        <View
+                          key={`${groupIndex}-${index}`}
+                          className={`flex-row p-2 ${
+                            groupIndex % 2 === 0 ? "bg-white" : "bg-gray-100"
+                          }`}
+                        >
+                          <Text className="w-[180px] text-center">
+                            {transaction.codeTransaction}
+                          </Text>
+                          <Text className="w-40 text-center">
+                            {transaction.productName}
+                          </Text>
+                          <Text className="w-24 text-center">
+                            {transaction.quantity}
+                          </Text>
+                          <Text className="w-32 text-center">
+                            Rp {transaction.totalPrice.toLocaleString("id-ID")}
+                          </Text>
+                          <Text className="w-48 text-center">
+                            {transaction.timestamps}
+                          </Text>
+                        </View>
+                      ))
+                    ))     
+                  ) : (
+                    <View className="pb-4 rounded-lg bg-white flex justify-center items-center">
+                <Image source={require("../../assets/notFound.png")} alt="Tidak Ada Transaksi" className="w-72 h-72" />
+                <Text className="font-bold text-neutral-700 text-xl">Tidak Ada Produk...</Text>
+              </View>
+                  )               
                 }
               </View>
             </ScrollView>

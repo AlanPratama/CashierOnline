@@ -66,7 +66,9 @@ export default function ProductScreen() {
       </View>
       </View>
         <View className="mt-4">
-          <ScrollView
+          {
+            products.length > 0 ? (
+              <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 50 }}
           >
@@ -114,6 +116,13 @@ export default function ProductScreen() {
               </Animated.View>
             ))}
           </ScrollView>
+            ) : (
+              <View className="pb-4 rounded-lg bg-white flex justify-center items-center">
+                <Image source={require("../../assets/notFound.png")} alt="Tidak Ada Transaksi" className="w-72 h-72" />
+                <Text className="font-bold text-neutral-700 text-xl">Tidak Ada Produk...</Text>
+              </View>
+            )
+          }
         </View>
       </View>
 
